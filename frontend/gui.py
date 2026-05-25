@@ -7,6 +7,7 @@ from backend.crud import (
     atualizar_jogador,
     atualizar_valor_mercado,
     criar_clube,
+    criar_estatistica,
     criar_jogador,
     criar_valor_mercado,
     deletar_clube,
@@ -358,6 +359,7 @@ def criar_gui():
     botoes_estatisticas = ttk.Frame(painel_estatisticas)
     botoes_estatisticas.grid(row=7, column=0, columnspan=2, pady=10, sticky="ew")
     for texto, comando in [
+        ("Criar", lambda: criar_estatistica_gui()),
         ("Selecionar", lambda: selecionar_estatistica()),
         ("Atualizar", lambda: atualizar_estatistica_gui()),
     ]:
@@ -397,6 +399,24 @@ def criar_gui():
         stat_amarelos.insert(0, item[6])
         stat_vermelhos.delete(0, tk.END)
         stat_vermelhos.insert(0, item[7])
+
+    def criar_estatistica_gui():
+        try:
+            jogador_text = stat_jogador_combo.get().strip()
+            if " - " not in jogador_text:
+                raise ValueError("Selecione um jogador válido.")
+            jogador_id = int(jogador_text.split(" - ")[0])
+            jogos = validar_inteiro(stat_jogos.get().strip(), "Jogos")
+            gols = validar_inteiro(stat_gols.get().strip(), "Gols")
+            assist = validar_inteiro(stat_assist.get().strip(), "Assistências")
+            minutos = validar_inteiro(stat_minutos.get().strip(), "Minutos")
+            amarelos = validar_inteiro(stat_amarelos.get().strip(), "Amarelos")
+            vermelhos = validar_inteiro(stat_vermelhos.get().strip(), "Vermelhos")
+            criar_estatistica(jogador_id, jogos, gols, assist, minutos, amarelos, vermelhos)
+            messagebox.showinfo("Sucesso", "Estatística criada com sucesso.")
+            carregar_estatisticas()
+        except Exception as exc:
+            messagebox.showerror("Erro", str(exc))
 
     def atualizar_estatistica_gui():
         try:
