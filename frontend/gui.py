@@ -362,6 +362,7 @@ def criar_gui():
         ("Criar", lambda: criar_estatistica_gui()),
         ("Selecionar", lambda: selecionar_estatistica()),
         ("Atualizar", lambda: atualizar_estatistica_gui()),
+        ("Deletar", lambda: deletar_estatistica_gui()),
     ]:
         btn = ttk.Button(botoes_estatisticas, text=texto, command=comando)
         btn.pack(side="left", expand=True, fill="x", padx=3)
@@ -433,6 +434,22 @@ def criar_gui():
             atualizar_estatistica(jogador_id, jogos, gols, assist, minutos, amarelos, vermelhos)
             messagebox.showinfo("Sucesso", "Estatística atualizada com sucesso.")
             carregar_estatisticas()
+        except Exception as exc:
+            messagebox.showerror("Erro", str(exc))
+
+    def deletar_estatistica_gui():
+        try:
+            item = selecionar_item_tree(estat_tree)
+            if not item:
+                raise ValueError("Selecione uma estatística para deletar.")
+            jogador_text = stat_jogador_combo.get().strip()
+            if " - " not in jogador_text:
+                raise ValueError("Selecione um jogador válido para deletar.")
+            jogador_id = int(jogador_text.split(" - ")[0])
+            if messagebox.askyesno("Confirmar", "Deseja deletar a estatística desse jogador?"):
+                deletar_estatistica(jogador_id)
+                messagebox.showinfo("Sucesso", "Estatística deletada com sucesso.")
+                carregar_estatisticas()
         except Exception as exc:
             messagebox.showerror("Erro", str(exc))
 
