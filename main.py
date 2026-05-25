@@ -1,5 +1,4 @@
-from backend.crud import *
-from backend.database import *
+from backend.database import inicializar_bd
 from frontend.gui import criar_gui
 
 
