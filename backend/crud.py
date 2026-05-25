@@ -335,3 +335,50 @@ def listar_jogadores_com_estatisticas():
     except Exception as e:
         print(f"Erro: Não foi possível listar jogadores com estatísticas: {e}")
         return []
+
+
+def listar_analise_mercado():
+    try:
+        conn = conectar()
+        cursor = conn.cursor()
+        cursor.execute(
+            """
+            SELECT
+                j.id,
+                j.nome,
+                COALESCE(c.nome, 'Sem clube') AS clube,
+                COALESCE(v.valor, 0) AS valor,
+                COALESCE(e.jogos, 0) AS jogos,
+                COALESCE(e.gols, 0) AS gols,
+                COALESCE(e.assistencias, 0) AS assistencias,
+                COALESCE(e.minutos_jogados, 0) AS minutos,
+                ROUND(
+                    COALESCE(e.gols, 0) * 3.0
+                    + COALESCE(e.assistencias, 0) * 2.0
+                    + COALESCE(e.jogos, 0) * 0.2
+                    + COALESCE(e.minutos_jogados, 0) / 120.0,
+                    2
+                ) AS score
+            FROM jogadores j
+            LEFT JOIN clubes c ON c.id = j.clube_id
+            LEFT JOIN estatisticas e ON e.jogador_id = j.id
+            LEFT JOIN (
+                SELECT
+                    jogador_id,
+                    valor,
+                    data_atualizacao,
+                    ROW_NUMBER() OVER (
+                        PARTITION BY jogador_id
+                        ORDER BY data_atualizacao DESC, id DESC
+                    ) AS rn
+                FROM valores_mercado
+            ) v ON v.jogador_id = j.id AND v.rn = 1
+            ORDER BY valor DESC, score DESC, j.nome
+            """
+        )
+        dados = cursor.fetchall()
+        conn.close()
+        return dados
+    except Exception as e:
+        print(f"Erro: Não foi possível gerar análise de mercado: {e}")
+        return []

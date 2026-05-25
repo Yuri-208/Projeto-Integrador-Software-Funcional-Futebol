@@ -6,7 +6,6 @@ from backend.crud import (
     atualizar_estatistica,
     atualizar_jogador,
     atualizar_valor_mercado,
-    buscar_clube_por_id,
     criar_clube,
     criar_jogador,
     criar_valor_mercado,
@@ -14,6 +13,7 @@ from backend.crud import (
     deletar_estatistica,
     deletar_jogador,
     deletar_valor_mercado,
+    listar_analise_mercado,
     listar_clubes,
     listar_estatisticas,
     listar_jogadores,
@@ -443,12 +443,28 @@ def criar_gui():
     tabela_valores_frame.rowconfigure(0, weight=1)
     tabela_valores_frame.columnconfigure(0, weight=1)
     valor_tree = criar_tabela(tabela_valores_frame, ["id", "jogador", "valor", "data"], ["ID", "Jogador", "Valor", "Data"])
+
+    analise_frame = ttk.LabelFrame(frame_valores, text="Análise de mercado")
+    analise_frame.grid(row=1, column=1, sticky="nsew", pady=(10, 0))
+    analise_frame.rowconfigure(0, weight=1)
+    analise_frame.columnconfigure(0, weight=1)
+    analise_tree = criar_tabela(
+        analise_frame,
+        ["id", "jogador", "clube", "valor", "jogos", "gols", "assistencias", "minutos", "score"],
+        ["ID", "Jogador", "Clube", "Valor (M)", "Jogos", "Gols", "Assistências", "Minutos", "Score"],
+    )
     frame_valores.columnconfigure(1, weight=1)
+    frame_valores.rowconfigure(1, weight=1)
 
     valor_id_var = tk.IntVar(value=0)
 
     def carregar_valores():
         atualizar_treeview(valor_tree, listar_valores_mercado(), widths=[50, 220, 120, 120])
+        atualizar_treeview(
+            analise_tree,
+            listar_analise_mercado(),
+            widths=[50, 220, 150, 90, 70, 70, 100, 90, 90],
+        )
 
     def selecionar_valor():
         item = selecionar_item_tree(valor_tree)
