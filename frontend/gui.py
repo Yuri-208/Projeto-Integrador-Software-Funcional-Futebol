@@ -6,6 +6,7 @@ from backend.crud import (
     atualizar_estatistica,
     atualizar_jogador,
     atualizar_valor_mercado,
+    buscar_clube_por_id,
     criar_clube,
     criar_jogador,
     criar_valor_mercado,
@@ -16,6 +17,7 @@ from backend.crud import (
     listar_clubes,
     listar_estatisticas,
     listar_jogadores,
+    listar_jogadores_por_clube,
     listar_valores_mercado,
 )
 
@@ -147,12 +149,31 @@ def criar_gui():
         ["id", "nome", "pais", "ano", "titulos"],
         ["ID", "Nome", "País", "Ano", "Títulos"],
     )
+
+    elenco_frame = ttk.LabelFrame(frame_clubes, text="Elenco do clube")
+    elenco_frame.grid(row=1, column=1, sticky="nsew", pady=(10, 0))
+    elenco_frame.rowconfigure(0, weight=1)
+    elenco_frame.columnconfigure(0, weight=1)
+    elenco_tree = criar_tabela(
+        elenco_frame,
+        ["id", "nome", "idade", "posicao"],
+        ["ID", "Nome", "Idade", "Posição"],
+    )
     frame_clubes.columnconfigure(1, weight=1)
+    frame_clubes.rowconfigure(1, weight=1)
+
+    def atualizar_elenco_clube(clube_id=None):
+        if clube_id is None:
+            clube_id = clube_id_var.get() or None
+
+        dados = listar_jogadores_por_clube(clube_id) if clube_id else []
+        atualizar_treeview(elenco_tree, dados, widths=[50, 220, 80, 120])
 
     def carregar_clubes():
         atualizar_treeview(clube_tree, listar_clubes(), widths=[50, 220, 150, 90, 90])
         clube_combo["values"] = carregar_clubes_combobox()
         jogador_clube_combo["values"] = carregar_clubes_combobox()
+        atualizar_elenco_clube()
 
     def selecionar_clube():
         item = selecionar_item_tree(clube_tree)
@@ -169,6 +190,7 @@ def criar_gui():
         clube_titulos.delete(0, tk.END)
         clube_titulos.insert(0, item[4])
         clube_combo.set(f"{item[0]} - {item[1]}")
+        atualizar_elenco_clube(int(item[0]))
 
     def criar_clube_gui():
         try:
@@ -206,6 +228,7 @@ def criar_gui():
                 raise ValueError("Selecione um clube para deletar.")
             if messagebox.askyesno("Confirmar", "Deseja deletar o clube selecionado?"):
                 deletar_clube(int(item[0]))
+                clube_id_var.set(0)
                 messagebox.showinfo("Sucesso", "Clube deletado com sucesso.")
                 carregar_clubes()
         except Exception as exc:

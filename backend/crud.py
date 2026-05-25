@@ -60,6 +60,19 @@ def deletar_clube(id):
         print(f"Erro: Erro ao deletar clube: {e}")
 
 
+def buscar_clube_por_id(clube_id):
+    try:
+        conn = conectar()
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM clubes WHERE id = ?", (clube_id,))
+        clube = cursor.fetchone()
+        conn.close()
+        return clube
+    except Exception as e:
+        print(f"Erro: Não foi possível buscar o clube: {e}")
+        return None
+
+
 # CRUD JOGADORES
 
 
@@ -101,6 +114,27 @@ def listar_jogadores():
         return dados
     except Exception as e:
         print(f"Erro: Erro ao listar jogadores: {e}")
+        return []
+
+
+def listar_jogadores_por_clube(clube_id):
+    try:
+        conn = conectar()
+        cursor = conn.cursor()
+        cursor.execute(
+            """
+            SELECT j.id, j.nome, j.idade, j.posicao
+            FROM jogadores j
+            WHERE j.clube_id = ?
+            ORDER BY j.nome
+            """,
+            (clube_id,),
+        )
+        dados = cursor.fetchall()
+        conn.close()
+        return dados
+    except Exception as e:
+        print(f"Erro: Erro ao listar elenco do clube: {e}")
         return []
 
 
