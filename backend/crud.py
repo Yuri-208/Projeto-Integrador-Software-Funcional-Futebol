@@ -267,3 +267,37 @@ def deletar_valor_mercado(id):
         print(f"OK: Valor de mercado ID {id} deletado com sucesso!")
     except Exception as e:
         print(f"Erro: Erro ao deletar valor de mercado: {e}")
+
+
+# Função para buscar jogador por ID
+def buscar_jogador_por_id(jogador_id):
+    try:
+        conn = conectar()
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM jogadores WHERE id = ?", (jogador_id,))
+        jogador = cursor.fetchone()
+        conn.close()
+        return jogador
+    except Exception as e:
+        print(f"Erro: Não foi possível buscar o jogador: {e}")
+        return None
+
+# Função para listar jogadores com estatísticas
+def listar_jogadores_com_estatisticas():
+    try:
+        conn = conectar()
+        cursor = conn.cursor()
+        cursor.execute(
+            """
+            SELECT j.id, j.nome, j.idade, j.posicao, c.nome AS clube, e.jogos, e.gols, e.assistencias, e.minutos_jogados, e.cartoes_amarelos, e.cartoes_vermelhos
+            FROM jogadores j
+            LEFT JOIN clubes c ON j.clube_id = c.id
+            LEFT JOIN estatisticas e ON j.id = e.jogador_id
+            """
+        )
+        dados = cursor.fetchall()
+        conn.close()
+        return dados
+    except Exception as e:
+        print(f"Erro: Não foi possível listar jogadores com estatísticas: {e}")
+        return []
