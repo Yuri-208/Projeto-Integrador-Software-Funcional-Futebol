@@ -58,6 +58,35 @@ def validar_float(valor, nome):
         raise ValueError(f"O campo '{nome}' deve ser um número decimal.")
 
 
+def parse_combo_id(valor, descricao, permitir_vazio=False):
+    texto = (valor or "").strip()
+    if not texto:
+        if permitir_vazio:
+            return None
+        raise ValueError(f"Selecione um {descricao} válido.")
+    if " - " not in texto:
+        if permitir_vazio:
+            return None
+        raise ValueError(f"Selecione um {descricao} válido.")
+    try:
+        return int(texto.split(" - ", 1)[0])
+    except ValueError as exc:
+        raise ValueError(f"Selecione um {descricao} válido.") from exc
+
+
+def localizar_opcao_por_nome(opcoes, nome):
+    return next((opcao for opcao in opcoes if opcao.endswith(f" - {nome}")), None)
+
+
+def selecionar_combo_por_nome(combo, opcoes, nome):
+    valor = localizar_opcao_por_nome(opcoes, nome)
+    if valor is None:
+        combo.set("")
+        return False
+    combo.set(valor)
+    return True
+
+
 def atualizar_treeview(tree, dados, widths=None):
     tree.delete(*tree.get_children())
     for item in dados:
@@ -297,8 +326,7 @@ def criar_gui():
             nome = jogador_nome.get().strip()
             idade = validar_inteiro(jogador_idade.get().strip(), "Idade")
             posicao = jogador_posicao.get().strip()
-            clube_text = jogador_clube_combo.get().strip()
-            clube_id = int(clube_text.split(" - ")[0]) if " - " in clube_text else None
+            clube_id = parse_combo_id(jogador_clube_combo.get(), "clube", permitir_vazio=True)
             if not nome:
                 raise ValueError("O campo 'Nome' é obrigatório.")
             criar_jogador(nome, idade, posicao, clube_id)
@@ -315,8 +343,7 @@ def criar_gui():
             nome = jogador_nome.get().strip()
             idade = validar_inteiro(jogador_idade.get().strip(), "Idade")
             posicao = jogador_posicao.get().strip()
-            clube_text = jogador_clube_combo.get().strip()
-            clube_id = int(clube_text.split(" - ")[0]) if " - " in clube_text else None
+            clube_id = parse_combo_id(jogador_clube_combo.get(), "clube", permitir_vazio=True)
             atualizar_jogador(id_jogador, nome, idade, posicao, clube_id)
             messagebox.showinfo("Sucesso", "Jogador atualizado com sucesso.")
             carregar_jogadores()
@@ -386,8 +413,12 @@ def criar_gui():
         if not item:
             messagebox.showwarning("Atenção", "Selecione uma estatística.")
             return
-        jogador_text = next((opt for opt in carregar_jogadores_combobox() if opt.endswith(f" - {item[1]}")), item[1])
-        stat_jogador_combo.set(jogador_text)
+
+        opcoes = carregar_jogadores_combobox()
+        if not selecionar_combo_por_nome(stat_jogador_combo, opcoes, item[1]):
+            messagebox.showwarning("Atenção", "Jogador selecionado não está mais disponível.")
+            return
+
         stat_jogos.delete(0, tk.END)
         stat_jogos.insert(0, item[2])
         stat_gols.delete(0, tk.END)
@@ -403,10 +434,7 @@ def criar_gui():
 
     def criar_estatistica_gui():
         try:
-            jogador_text = stat_jogador_combo.get().strip()
-            if " - " not in jogador_text:
-                raise ValueError("Selecione um jogador válido.")
-            jogador_id = int(jogador_text.split(" - ")[0])
+            jogador_id = parse_combo_id(stat_jogador_combo.get(), "jogador")
             jogos = validar_inteiro(stat_jogos.get().strip(), "Jogos")
             gols = validar_inteiro(stat_gols.get().strip(), "Gols")
             assist = validar_inteiro(stat_assist.get().strip(), "Assistências")
@@ -421,10 +449,7 @@ def criar_gui():
 
     def atualizar_estatistica_gui():
         try:
-            jogador_text = stat_jogador_combo.get().strip()
-            if " - " not in jogador_text:
-                raise ValueError("Selecione um jogador válido.")
-            jogador_id = int(jogador_text.split(" - ")[0])
+            jogador_id = parse_combo_id(stat_jogador_combo.get(), "jogador")
             jogos = validar_inteiro(stat_jogos.get().strip(), "Jogos")
             gols = validar_inteiro(stat_gols.get().strip(), "Gols")
             assist = validar_inteiro(stat_assist.get().strip(), "Assistências")
@@ -442,10 +467,12 @@ def criar_gui():
             item = selecionar_item_tree(estat_tree)
             if not item:
                 raise ValueError("Selecione uma estatística para deletar.")
-            jogador_text = stat_jogador_combo.get().strip()
-            if " - " not in jogador_text:
-                raise ValueError("Selecione um jogador válido para deletar.")
-            jogador_id = int(jogador_text.split(" - ")[0])
+
+            jogador_opcao = localizar_opcao_por_nome(carregar_jogadores_combobox(), item[1])
+            if jogador_opcao is None:
+                raise ValueError("Não foi possível localizar o jogador dessa estatística.")
+            jogador_id = parse_combo_id(jogador_opcao, "jogador")
+
             if messagebox.askyesno("Confirmar", "Deseja deletar a estatística desse jogador?"):
                 deletar_estatistica(jogador_id)
                 messagebox.showinfo("Sucesso", "Estatística deletada com sucesso.")
@@ -509,8 +536,9 @@ def criar_gui():
             messagebox.showwarning("Atenção", "Selecione um valor.")
             return
         valor_id_var.set(item[0])
-        jogador_text = next((opt for opt in carregar_jogadores_combobox() if opt.endswith(f" - {item[1]}")), item[1])
-        valor_jogador_combo.set(jogador_text)
+        if not selecionar_combo_por_nome(valor_jogador_combo, carregar_jogadores_combobox(), item[1]):
+            messagebox.showwarning("Atenção", "Jogador selecionado não está mais disponível.")
+            return
         valor_valor.delete(0, tk.END)
         valor_valor.insert(0, item[2])
         valor_data.delete(0, tk.END)
@@ -518,10 +546,7 @@ def criar_gui():
 
     def criar_valor_gui():
         try:
-            jogador_text = valor_jogador_combo.get().strip()
-            if " - " not in jogador_text:
-                raise ValueError("Selecione um jogador válido.")
-            jogador_id = int(jogador_text.split(" - ")[0])
+            jogador_id = parse_combo_id(valor_jogador_combo.get(), "jogador")
             valor = validar_float(valor_valor.get().strip(), "Valor")
             data = valor_data.get().strip() or None
             criar_valor_mercado(jogador_id, valor, data)
