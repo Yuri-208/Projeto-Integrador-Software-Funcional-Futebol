@@ -99,8 +99,9 @@ def atualizar_treeview(tree, dados, widths=None):
 def criar_gui():
     root = tk.Tk()
     root.title("Gestão de Futebol")
-    root.geometry("920x540")
-    root.minsize(880, 500)
+    # Tamanho inicial maior e mínimo maior para evitar cortes
+    root.geometry("1200x700")
+    root.minsize(1100, 600)
     root.rowconfigure(0, weight=1)
     root.columnconfigure(0, weight=1)
 
@@ -123,6 +124,10 @@ def criar_gui():
     frame_jogadores = criar_aba("Jogadores")
     frame_estatisticas = criar_aba("Estatísticas")
     frame_valores = criar_aba("Valores")
+    # Garantir expansão dos frames principais
+    for frame in [frame_clubes, frame_jogadores, frame_estatisticas, frame_valores]:
+        frame.rowconfigure(0, weight=1)
+        frame.columnconfigure(1, weight=1)
 
     def criar_painel_lateral(frame):
         painel = ttk.LabelFrame(frame, text="Dados")
@@ -132,13 +137,25 @@ def criar_gui():
 
     def criar_tabela(frame, colunas, headings):
         tabela = ttk.Treeview(frame, columns=colunas, show="headings", selectmode="browse")
+        # Larguras mínimas padrão para evitar corte inicial (ajustadas)
+        larguras_padrao = {
+            "id": 50, "nome": 200, "pais": 120, "ano": 80, "titulos": 80,
+            "jogador": 180, "idade": 80, "posicao": 120, "clube": 180,
+            "jogos": 80, "gols": 80, "assist": 100, "minutos": 120, "amarelos": 80, "vermelhos": 80,
+            "valor": 120, "data": 120, "score": 100, "assistencias": 100
+        }
         for coluna, titulo in zip(colunas, headings):
             tabela.heading(coluna, text=titulo)
-            tabela.column(coluna, anchor="w")
+            tabela.column(coluna, anchor="w", width=larguras_padrao.get(coluna, 80), minwidth=larguras_padrao.get(coluna, 80))
         tabela.grid(row=0, column=0, sticky="nsew")
-        scrollbar = ttk.Scrollbar(frame, orient=tk.VERTICAL, command=tabela.yview)
-        tabela.configure(yscroll=scrollbar.set)
-        scrollbar.grid(row=0, column=1, sticky="ns")
+        # Scrollbar vertical
+        scrollbar_y = ttk.Scrollbar(frame, orient=tk.VERTICAL, command=tabela.yview)
+        tabela.configure(yscroll=scrollbar_y.set)
+        scrollbar_y.grid(row=0, column=1, sticky="ns")
+        # Scrollbar horizontal
+        scrollbar_x = ttk.Scrollbar(frame, orient=tk.HORIZONTAL, command=tabela.xview)
+        tabela.configure(xscroll=scrollbar_x.set)
+        scrollbar_x.grid(row=1, column=0, sticky="ew")
         return tabela
 
     # ------- Clubes -------
@@ -406,7 +423,12 @@ def criar_gui():
     frame_estatisticas.columnconfigure(1, weight=1)
 
     def carregar_estatisticas():
-        atualizar_treeview(estat_tree, listar_estatisticas(), widths=[50, 180, 80, 80, 120, 90, 90, 90])
+        # Novas larguras: ID, Jogador, Jogos, Gols, Assistências, Minutos, Amarelos, Vermelhos
+        atualizar_treeview(
+            estat_tree,
+            listar_estatisticas(),
+            widths=[40, 120, 60, 60, 80, 100, 60, 60]
+        )
 
     def selecionar_estatistica():
         item = selecionar_item_tree(estat_tree)
