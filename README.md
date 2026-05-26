@@ -82,5 +82,3 @@ cd Projeto-Integrador-Software-Funcional-Futebol
 
 ## Bash:
 python main.py
-
-safaasffff
