@@ -82,3 +82,8 @@ cd Projeto-Integrador-Software-Funcional-Futebol
 
 ## Bash:
 python main.py
+<<<<<<< HEAD
+=======
+
+> Ao executar pela primeira vez, o aplicativo inicializa o banco de dados com exemplos completos de Grêmio e Barcelona, incluindo 11 jogadores titulares, estatísticas e valores de mercado.
+>>>>>>> 46fcaeb (Feat: Adicionando jogadores ao repositorio)
