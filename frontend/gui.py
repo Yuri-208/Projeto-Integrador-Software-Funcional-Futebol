@@ -98,7 +98,7 @@ def atualizar_treeview(tree, dados, widths=None):
 
 def criar_gui():
     root = tk.Tk()
-    root.title("Gestão de Futebol")
+    root.title("Soccer App")
     # Tamanho inicial maior e mínimo maior para evitar cortes
     root.geometry("1200x500")
     root.minsize(1100, 600)

@@ -36,6 +36,13 @@ A estrutura do banco de dados foi normalizada para garantir que o relacionamento
 
 ---
 
+![Diagrama de Classes](diagrama.png)
+
+---
+
+
+---
+
 ## Funcionalidades do Sistema
 
 O sistema opera de forma modular e integrada à interface, oferecendo as seguintes capacidades:
