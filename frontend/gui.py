@@ -100,7 +100,7 @@ def criar_gui():
     root = tk.Tk()
     root.title("Gestão de Futebol")
     # Tamanho inicial maior e mínimo maior para evitar cortes
-    root.geometry("1200x700")
+    root.geometry("1200x500")
     root.minsize(1100, 600)
     root.rowconfigure(0, weight=1)
     root.columnconfigure(0, weight=1)
@@ -221,6 +221,16 @@ def criar_gui():
         clube_combo["values"] = carregar_clubes_combobox()
         jogador_clube_combo["values"] = carregar_clubes_combobox()
         atualizar_elenco_clube()
+
+    def ao_clicar_clube(event):
+        """Evento disparado ao clicar na tabela de clubes"""
+        item = selecionar_item_tree(clube_tree)
+        if item:
+            clube_id_var.set(item[0])
+            atualizar_elenco_clube(int(item[0]))
+
+    # Bind para clique na tabela de clubes
+    clube_tree.bind("<ButtonRelease-1>", ao_clicar_clube)
 
     def selecionar_clube():
         item = selecionar_item_tree(clube_tree)
