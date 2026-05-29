@@ -89,3 +89,9 @@ cd Projeto-Integrador-Software-Funcional-Futebol
 
 ## Bash:
 python main.py
+
+---
+
+SLIDES DO PROJETO CANVA:
+
+https://canva.link/uw62dancqt1hj1v
